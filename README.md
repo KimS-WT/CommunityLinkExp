@@ -1,6 +1,6 @@
 ## Users
 
-I created 8 Users, one for each possible subtype combination:
+8 Users, one for each possible subtype combination:
 
 Hero
 Subtypes: None
