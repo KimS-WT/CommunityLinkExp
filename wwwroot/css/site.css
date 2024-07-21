@@ -1,0 +1,169 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+  background-color: #cfe3fc;
+}
+
+body {
+  margin-bottom: 60px;
+  background-color: #cfe3fc;
+}
+
+.donationBlueBox, .aboutBlueBox, .indexBlueBox {
+  margin-top: 150px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 357px;
+  opacity: 1;
+  background: #0B64CF;
+}
+
+#DonationTitle, #AboutTitle {
+  text-align: center !important;
+  font-family: "Vista Sans OTCE Black", Arial, Helvetica, sans-serif;
+  font-size: 3.6em;
+  letter-spacing: 0.8px;
+  color: #FFFFFF;
+}
+
+.BlueTitleH1 {
+  font-family: "Bricolage Grotesque", 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  font-size: 2.4em;
+  font-weight: bold;
+  color: #102E68;
+}
+
+.BodyBlack {
+  font-family: "Bricolage Grotesque", 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  font-size: 1.3em;
+  font-weight: bold;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+
+.greenButton {
+  width: 100%;
+  max-width: 485px;
+  height: 106px;
+  font-size: 2em;
+  color: white;
+  font-family: "Bricolage Grotesque Bold", 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  text-decoration: none;
+  background: #248646;
+  border-radius: 800px;
+  opacity: 1;
+}
+
+
+
+.row-md-height {
+  display: table;
+  table-layout: fixed;
+  height: 100%;
+  width: 100%;
+}
+
+.col-md-height {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inside-full-height {
+  width: 100%;
+  height: 100%;
+  margin-bottom: 0;
+  margin-top: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+.content-wrapper {
+  padding: 3rem;
+}
+
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+#wallet {
+  background-image: url('/images/Wallet.png');
+  background-repeat: no-repeat;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+#monetaryDonations, #aboutUs {
+  width: 100%;
+  height: 100%;
+  background: #B9D1F0 0% 0% no-repeat padding-box;
+  opacity: 1;
+}
+#monetaryDonations, #aboutUs {
+  width: 100%;
+  height: 100%;
+  background: #B9D1F0 0% 0% no-repeat padding-box;
+  opacity: 1;
+}
+
+#ourMission, #donationLocationModal {
+  width: 100%;
+  height: 100%;
+  background: #6eacf7 0% 0% no-repeat padding-box;
+  opacity: 1;
+  margin-top: 4px;
+}
+
+
+.spacerFromTop {
+  margin-top: 184px;
+}
+
+.row.splitscreen>* {
+  padding: 0;
+}
+
+.splitscreen {
+  display: flex;
+}
+
+a:hover {
+  color: white;
+}
+
+.bg-white {
+  --bs-bg-opacity: .5;
+  background-color: rgba(var(--bs-white-rgb), var(--bs-bg-opacity)) !important;
+}
+
+#givingFood {
+  background-image: url('/images/GivingFood.png');
+  background-repeat: no-repeat;
+  box-sizing: border-box;
+  height: 100%;
+  width: 100%;
+}
+
+

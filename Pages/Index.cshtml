@@ -1,0 +1,29 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+
+@* <img src="images/CommunityLinkLogo2.png" class="img-fluid rounded mx-auto d-block" alt="Your Image Description"> *@
+<div class="container text-center mt-5">
+        <!-- Image acting as Home Button -->
+        <a id="homeButton" href="/Index">
+            <img src="images/CommunityLinkLogo2.png" class="img-fluid rounded mx-auto d-block home-button" alt="Home">
+        </a>
+    </div>
+
+<!--Temporary placeholder to show that you are signed in-->
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <div id="welcomeInfo">
+        @if (!string.IsNullOrEmpty(Model.Username))
+        {
+            <p>Welcome, @Model.Username!</p>
+        }
+        else
+        {
+            <p>Welcome to Community Link!</p>
+        }
+    </div>
+</div>
