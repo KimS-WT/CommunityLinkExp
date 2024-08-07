@@ -7,7 +7,7 @@ using MySql.EntityFrameworkCore.Metadata;
 namespace CommunityLink.Migrations
 {
     /// <inheritdoc />
-    public partial class initialCreate : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

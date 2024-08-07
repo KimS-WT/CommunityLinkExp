@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CommunityLink.Migrations
 {
     [DbContext(typeof(CommunityLinkDbContext))]
-    [Migration("20240724171057_initialCreate")]
-    partial class initialCreate
+    [Migration("20240806233005_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
