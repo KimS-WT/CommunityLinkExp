@@ -1,384 +1,122 @@
 @page
-@model CommunityLink.Pages.MyStatisticsModel
+@model CommunityLink.Pages.VolunteerModel
 @{
-    ViewData["Title"] = "My Statistics";
+    ViewData["Title"] = "Volunteer Services";
 }
 
-<div class="container-fluid spacerFromTop">
-    <div class="container mt-4">
+<div class="spacerFromTop"></div>
+
+<div class="container mt-4">
     <div class="row mt-3">
         <div class="col-12" id="volunteerTop">
-            <h1>My Statistics <br>
-                Welcome @Model.ThisUser?.FullName!</h1>
-            <p>Below are your Stats!<br>
-            Thank you for all your contributions!</p>
+            <h1>Welcome @Model.ThisUser?.FullName ?? "Guest"!</h1>
+            <p>Feel free to browse these requests to find a cause that speaks to you! If you'd like to donate a physical item to a cause, please go to this address to make the donation!</p>
         </div>
     </div>
-    <div class="container" style="padding: auto; margin: auto;">
 
-        <div class="row">    
+    @if (Model.SelectedRequest == null) {
+        <div class="row mt-3">
+            <div class="col-12">
+                <h2 class="text-center">Requests</h2>
+                <table class="table table-striped" id="volunteerTable">
+                     <thead>
+                        <tr>
+                            <th scope="col">
+                                <a asp-page="/Volunteer" asp-route-pageIndex="@Model.CurrentPage" asp-route-sortOrder="@Model.GetSortOrder("title")">Request Title</a>
+                            </th>
+                            <th scope="col">
+                                <a asp-page="/Volunteer" asp-route-pageIndex="@Model.CurrentPage" asp-route-sortOrder="@Model.GetSortOrder("date")">Request Description</a>
+                            </th>
+                            <th scope="col">Needed</th>
+                            <th scope="col">
+                                <a asp-page="/Volunteer" asp-route-pageIndex="@Model.CurrentPage" asp-route-sortOrder="@Model.GetSortOrder("deadline")">Request Deadline</a>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var request in Model.Requests) {
+                            <tr>
+                                <td>
+                                    <a asp-page="/Volunteer" asp-route-requestId="@request.RequestID">@request.RequestTitle</a>
+                                </td>
+                                <td class="request-description">@request.RequestDate - @request.RequestDescription</td>
+                                <td>
+                                    @if (request.Category == "Monetary") {
+                                        @string.Format("{0:C}", request.AmountRequested - request.AmountRecieved)
+                                    } else {
+                                        @request.Category
+                                    }
+                                </td>
+                                <td>@request.RequestDeadline</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="row mt-3">
             <div class="col-12 text-center">
-                <h1>My Stats!</h1>
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        @if (Model.CurrentPage > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" asp-page="/Volunteer" asp-route-pageIndex="@(Model.CurrentPage - 1)">Previous</a>
+                            </li>
+                        }
+                        @for (int i = 1; i <= Model.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                <a class="page-link" asp-page="/Volunteer" asp-route-pageIndex="@i">@i</a>
+                            </li>
+                        }
+                        @if (Model.CurrentPage < Model.TotalPages)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" asp-page="/Volunteer" asp-route-pageIndex="@(Model.CurrentPage + 1)">Next</a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-6">
-                <!-- Chart Container (Resizable) -->
-                <div class="resizable-container">
-                    <canvas id="moneyDonatedChart" class="resizable-chart"></canvas>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <!-- Chart Container (Resizable) -->
-                <div class="resizable-container">
-                    <canvas id="itemsDonatedChart" class="resizable-chart"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="row">
+    } else {
+        <form asp-page-handler="Back" method="post" asp-route-pageIndex="@Model.CurrentPage">
+            <input type="hidden" name="pageIndex" value="@Model.CurrentPage" />
+            <button type="submit" class="btn mt-3 backButton">Back to Requests</button>
+        </form>
+        <div class="row mt-3">
             <div class="col-12">
-                <h2>Overall Statistics</h2>
-                <div class="table-responsive">
-                    <table class="table table-striped table-sm">
-                        <thead>
-                            <tr>
-                                <th scope="col">Total Money Donated</th>
-                                <th scope="col">Total Quantity Items Donated</th>
-                                <th scope="col">Total Hours Volunteered</th>
-                                <th scope="col">Number of Donations Made To CommunityLink/No Request Specified</th>
-                                <th scope="col">Number of Donations Made To Individual Requests</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model.UserStat != null)
-                            {
-                                var totalMoneyDonated = Model.UserStat.RequestStats
-                                    .Where(rs => rs.OldRequestID != 0)
-                                    .Sum(rs => rs.AmountDonated);
-
-                                var totalItemsDonated = Model.UserStat.DonationStats
-                                    .Sum(ds => ds.Quantity);
-
-                                var totalDonationsToCommunityLink = Model.UserStat.DonationStats
-                                    .Count(ds => ds.RequestStatID == null || ds.RequestStat?.OldRequestID == 0);
-
-                                var totalDonationsToRequests = Model.UserStat.RequestStats
-                                    .Where(rs => rs.OldRequestID != 0)
-                                    .Count();
-
-                                <tr>
-                                    <td>@string.Format("{0:C}", totalMoneyDonated)</td>
-                                    <td>@totalItemsDonated</td>
-                                    <td>@(Model.VolunteerData?.HoursWorked ?? 0)</td>
-                                    <td>@totalDonationsToCommunityLink</td>
-                                    <td>@totalDonationsToRequests</td>
-                                </tr>
+                <div class="row justify-content-center">
+                    <div class="col-md-5 mx-3 text-center requestViewBox">
+                        <h3>@Model.SelectedRequest.RequestTitle</h3>
+                        <p>@Model.SelectedRequest.RequestDescription</p>
+                    </div>
+                    <div class="col-md-5 mx-3 text-center requestViewBox">
+                        <h3>Support @Model.SelectedRequest.Requestor.User.Username</h3>
+                        @if (Model.ThisUser == null) {
+                            <p>Please sign in or create an account to make a donation or offer your support.</p>
+                            <a class="btn btn-md btn-primary" href="/Sign-in">Sign In</a>
+                            <a class="btn btn-md btn-secondary" href="/Sign-in">Create Account</a>
+                        } else {
+                            @if (Model.SelectedRequest.Category == "Monetary") {
+                                <p>This request needs @string.Format("{0:C}", Model.SelectedRequest.AmountRequested - Model.SelectedRequest.AmountRecieved) to reach its goal of @string.Format("{0:C}", Model.SelectedRequest.AmountRequested). Do you want to support this request? You can donate below:</p>
+                                <form asp-page-handler="Donate" method="post">
+                                    <input type="hidden" name="requestID" value="@Model.SelectedRequest.RequestID" />
+                                    <button type="submit" class="btn smallGreenButton">Donate</button>
+                                </form>
+                            } else if (Model.SelectedRequest.Category == "Item") {
+                                <p>This request is for an item donation. Please visit the nearest donation center to contribute.</p>
+                            } else if (Model.SelectedRequest.Category == "Labor") {
+                                <p>This request requires labor. Please follow the instructions in the description to offer your help.</p>
+                            } else {
+                                <p>This request is for @Model.SelectedRequest.Category. Please follow the instructions in the description.</p>
                             }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="6">No statistics available for this user.</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-12">
-                <h2>Your Monetary Donations</h2>
-                <div class="table-responsive resizable-container" style="max-height: 200px; overflow-y: auto;">
-                    <table class="table table-striped table-sm resizable-table">
-                        <thead class="fixed">
-                            <tr>
-                                <th><a asp-route-requestSortOrder="@Model.RequestTitleSort">Request Title</a></th>
-                                <th><a asp-route-requestSortOrder="@Model.RequestAmountSort">Amount Donated</a></th>
-                                <th><a asp-route-requestSortOrder="@Model.RequestDateSort">Donation Date</a></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model.UserStat?.RequestStats != null && Model.UserStat.RequestStats.Any())
-                            {
-                                @foreach (var requestStat in Model.UserStat.RequestStats.Where(rs => rs.OldRequestID != 0 && rs.AmountDonated != 0))
-                                {
-                                    <tr>
-                                        <td>@requestStat.RequestTitle</td>
-                                        <td>@string.Format("{0:C}", requestStat.AmountDonated)</td>
-                                        <td>@requestStat.DonationDate.ToShortDateString()</td>
-                                    </tr>
-                                }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="5">No monetary donations made.</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-12">
-                <h2>Total Items Donated</h2>
-                <div class="table-responsive resizable-container">
-                    <table class="table table-striped table-sm resizeable table">
-                        <thead>
-                            <tr>
-                                <th><a asp-route-requestSortOrder="@Model.RequestTitleSort">Request Title</a></th>
-                                <th><a asp-route-donationSortOrder="@Model.DonationItemNameSort">Item Name</a></th>
-                                <th><a asp-route-donationSortOrder="@Model.DonationQuantitySort">Quantity</a></th>
-                                <th><a asp-route-donationSortOrder="@Model.DonationDateSort">Date Donated</a></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model.UserStat?.DonationStats != null && Model.UserStat.DonationStats.Any())
-                            {
-                                @foreach (var donationStat in Model.UserStat.DonationStats.Where(ds => ds.RequestStatID != null))
-                                {
-                                    <tr>
-                                        <td>@donationStat.RequestStat?.RequestTitle</td>
-                                        <td>@donationStat.ItemName</td>
-                                        <td>@donationStat.Quantity</td>
-                                        <td>@donationStat.DateDonated.ToShortDateString()</td>
-                                    </tr>
-                                }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="5">No items donated to specific requests.</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-12">
-                <h2>Items Donated to Specific Requests</h2>
-                <div class="table-responsive"></div>
-                    <table class="table table-striped table-sm">
-                        <thead>
-                            <tr>
-                                <th><a asp-route-requestSortOrder="@Model.RequestTitleSort">Request Title</a></th>
-                                <th><a asp-route-donationSortOrder="@Model.DonationItemNameSort">Item Name</a></th>
-                                <th><a asp-route-donationSortOrder="@Model.DonationQuantitySort">Quantity</a></th>
-                                <th><a asp-route-donationSortOrder="@Model.DonationDateSort">Date Donated</a></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model.UserStat?.DonationStats != null && Model.UserStat.DonationStats.Any())
-                            {
-                                @foreach (var donationStat in Model.UserStat.DonationStats.Where(ds => ds.RequestStatID != null && ds.RequestStat?.OldRequestID != 0))
-                                {
-                                    <tr>
-                                        <td>@donationStat.RequestStat?.RequestTitle</td>
-                                        <td>@donationStat.ItemName</td>
-                                        <td>@donationStat.Quantity</td>
-                                        <td>@donationStat.DateDonated.ToShortDateString()</td>
-                                    </tr>
-                                }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="5">No Items Donated to Requests.</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>  
-        </div>
-        <div class="row">
-            <div class="col-12">    
-                <h2>Items Donated to CommunityLink/No Request Specified</h2>
-                <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
-                    <table class="table table-striped table-sm">
-                        <thead>
-                            <tr>
-                                <th><a asp-route-requestSortOrder="@Model.RequestTitleSort">Request Title</a></th>
-                                <th><a asp-route-donationSortOrder="@Model.DonationItemNameSort">Item Name</a></th>
-                                <th><a asp-route-donationSortOrder="@Model.DonationQuantitySort">Quantity</a></th>
-                                <th><a asp-route-donationSortOrder="@Model.DonationDateSort">Date Donated</a></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model.UserStat?.DonationStats != null && Model.UserStat.DonationStats.Any())
-                            {
-                                @foreach (var donationStat in Model.UserStat.DonationStats.Where(ds =>ds.RequestStat?.OldRequestID == 0))
-                                {
-                                    <tr>
-                                        <td>@donationStat.RequestStat?.RequestTitle</td>
-                                        <td>@donationStat.ItemName</td>
-                                        <td>@donationStat.Quantity</td>
-                                        <td>@donationStat.DateDonated.ToShortDateString()</td>
-                                    </tr>
-                                }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="3">No items donated to CommunityLink.</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-12">
-                <h2>Hours Volunteered</h2>
-                <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
-                    <table class="table table-striped table-sm">
-                        <thead class="fixed">
-                            <tr>
-                                <th scope="col">Volunteer Hours</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model.VolunteerData != null)
-                            {
-                                <tr>
-                                    <td>@Model.VolunteerData.HoursWorked</td>
-                                </tr>
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td>No volunteer hours recorded.</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+    }
 </div>
-
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
-
-    <script>
-        // Data for Money Donated Chart
-        var labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.UserStat?.RequestStats
-            .Where(rs => rs.OldRequestID != 0 && rs.AmountDonated !=0)
-            .GroupBy(rs => rs.RequestTitle)
-            .Select(g => g.Key)));
-
-        var moneyDonatedData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.UserStat?.RequestStats
-            .Where(rs => rs.OldRequestID != 0 && rs.AmountDonated !=0)
-            .GroupBy(rs => rs.RequestTitle)
-            .Select(g => g.Sum(rs => rs.AmountDonated))));
-
-        // Calculate the max value and add 1
-        var maxAmountDonated = Math.max.apply(null, moneyDonatedData) + 20; 
-
-        var ctx = document.getElementById('moneyDonatedChart').getContext('2d');
-        var moneyDonatedChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Total Money Donated to Request',
-                    data: moneyDonatedData,
-                    backgroundColor: '#007bff',
-                    borderColor: '#007bff',
-                    borderWidth: 2,
-                    fill: false
-                }]
-            },
-            options: {
-                maintainAspectRatio: false,
-                scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero: true,
-                            min: 0,
-                            max: maxAmountDonated, // Set max to the calculated value
-                        },
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Total Amount Donated'
-                        }
-                    }],
-                    xAxes: [{
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Request Titles'
-                        }
-                    }]
-                }
-            }
-        });
-
-        // Data for Items Donated Chart
-        var itemLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.UserStat?.DonationStats
-            .Where(ds => ds.RequestStatID != 0 && ds.RequestStat.AmountDonated ==0)
-            .GroupBy(ds => ds.RequestStat.RequestTitle)
-            .Select(g => g.Key)));
-
-        var itemsDonatedData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.UserStat?.DonationStats
-            .Where(ds => ds.RequestStatID != 0 && ds.RequestStat.AmountDonated ==0)
-            .GroupBy(ds => ds.RequestStat.RequestTitle)
-            .Select(g => g.Sum(ds => ds.Quantity))));
-
-        // Calculate the max value and add 1
-        var maxItemsDonated = Math.max.apply(null, itemsDonatedData) + 1;        
-
-        var ctx2 = document.getElementById('itemsDonatedChart').getContext('2d');
-        var itemsDonatedChart = new Chart(ctx2, {
-            type: 'bar',
-            data: {
-                labels: itemLabels,
-                datasets: [{
-                    label: 'Total Items Donated to Request',
-                    data: itemsDonatedData,
-                    backgroundColor: '#28a745',
-                    borderColor: '#28a745',
-                    borderWidth: 2,
-                    fill: false
-                }]
-            },
-            options: {
-                maintainAspectRatio: false,
-                scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero: true,
-                            min: 0,
-                            max: maxItemsDonated, // Set max to the calculated value
-                            stepSize: 1,
-                        },
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Total Items Donated'
-                        }
-                    }],
-                    xAxes: [{
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Request Titles'
-                        }
-                    }]
-                }
-            }
-        });
-
-        // Make tables and charts resizable
-        document.querySelectorAll('.resizable-container').forEach(function(container) {
-            container.style.resize = 'both';
-            container.style.overflow = 'auto';
-            container.style.minWidth = '300px'; // Minimum width for resizing
-            container.style.minHeight = '200px'; // Minimum height for resizing
-        });
-    </script>
-}
